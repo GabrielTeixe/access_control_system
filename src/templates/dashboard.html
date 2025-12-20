@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Access Control System</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <header>
+        Access Control System
+    </header>
+
+    <div class="container">
+        <div class="welcome">
+            Bem-vindo, {{ user }}!
+        </div>
+
+        <h2>Funcionalidades</h2>
+        <div class="button-grid">
+            <a href="/users">Gerenciar Usuários</a>
+            <a href="/roles">Gerenciar Roles</a>
+            <a href="/audit">Auditoria</a>
+        </div>
+
+        <div class="logout">
+            <a href="/auth/logout">Sair</a>
+        </div>
+    </div>
+</body>
+</html>
