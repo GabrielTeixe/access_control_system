@@ -69,3 +69,17 @@ python -m uvicorn src.main:app --reload
 5.Acessar no navegador:
 
 http://127.0.0.1:800
+
+*Usuário de Teste
+
+Usuário: admin
+
+Senha: 123 (senha criptografada usando bcrypt)
+
+Observações
+
+O projeto já possui templates HTML estilizados para login e dashboard.
+
+O sistema ainda pode ser expandido com CRUD completo de usuários, roles e auditoria.
+
+Recomenda-se não subir a pasta venv para o GitHub.
