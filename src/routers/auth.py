@@ -1,39 +1,53 @@
-from fastapi import APIRouter, Request, Form
+from fastapi import APIRouter, Request, Form, Response, status
 from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
-from passlib.context import CryptContext
 
 router = APIRouter()
 templates = Jinja2Templates(directory="src/templates")
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# Banco de dados simulado
+fake_users = {"admin": {"password": "1234", "full_name": "Administrador", "email": "admin@example.com", "role": "admin"}}
 
-# Usuários com senha já hasheada (senha = 123)
-USERS = {
-    "admin": "$2b$12$N2bVj9KfWZjUz3cYFxF1zu7N8b4z1D/6Y8o8bVmpC6D8U8w5Z1y3S"
-}
+# LOGIN
 
 @router.get("/login")
-def login_page(request: Request):
+def login_get(request: Request):
     return templates.TemplateResponse("login.html", {"request": request})
 
 @router.post("/login")
-def login(request: Request, username: str = Form(...), password: str = Form(...)):
-    hashed_password = USERS.get(username)
+def login_post(request: Request, response: Response, username: str = Form(...), password: str = Form(...)):
+    user = fake_users.get(username)
+    if user and user["password"] == password:
+        # Cria cookie de sessão
+        response = RedirectResponse(url="/dashboard", status_code=status.HTTP_302_FOUND)
+        response.set_cookie(key="user", value=username)
+        return response
+    else:
+        return templates.TemplateResponse("login.html", {"request": request, "error": "Usuário ou senha incorretos"})
 
-    if not hashed_password or not pwd_context.verify(password, hashed_password):
-        return templates.TemplateResponse(
-            "login.html",
-            {"request": request, "error": "Usuário ou senha incorretos"}
-        )
+# REGISTER
 
-    # Redireciona para o dashboard
-    response = RedirectResponse(url="/dashboard", status_code=303)
-    response.set_cookie(key="user", value=username)
-    return response
+@router.get("/register")
+def register_get(request: Request):
+    return templates.TemplateResponse("register.html", {"request": request})
 
-@router.get("/logout")
-def logout():
-    response = RedirectResponse(url="/auth/login", status_code=303)
-    response.delete_cookie(key="user")
-    return response
+@router.post("/register")
+def register_post(
+    request: Request,
+    username: str = Form(...),
+    password: str = Form(...),
+    full_name: str = Form(...),
+    email: str = Form(...),
+    role: str = Form(...)
+):
+    if username in fake_users:
+        return templates.TemplateResponse("register.html", {"request": request, "error": "Usuário já existe"})
+    
+    # Adiciona usuário ao "banco"
+    fake_users[username] = {
+        "password": password,
+        "full_name": full_name,
+        "email": email,
+        "role": role
+    }
+    return RedirectResponse(url="/auth/login", status_code=status.HTTP_302_FOUND)

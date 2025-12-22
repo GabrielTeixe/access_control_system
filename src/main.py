@@ -2,27 +2,36 @@ from fastapi import FastAPI, Request, Cookie
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse
-from src.routers import auth  # certifique-se que auth.py está dentro de src/routers
+from starlette.middleware.sessions import SessionMiddleware
+
+# Importar routers
+from src.routers import auth, users, access, audit, roles
 
 app = FastAPI(title="Access Control & Audit System")
 
-# Configura templates e static
+# Templates e static
 templates = Jinja2Templates(directory="src/templates")
 app.mount("/static", StaticFiles(directory="src/static"), name="static")
 
-# Inclui o router
-app.include_router(auth.router, prefix="/auth")
+# Session Middleware
+app.add_middleware(SessionMiddleware, secret_key="super-secret-key")
 
-# Página inicial redireciona para login
+# DASHBOARD
 @app.get("/", response_class=RedirectResponse)
 def root():
-    return RedirectResponse(url="/auth/login")
+    return RedirectResponse(url="/dashboard")
 
-# Dashboard
 @app.get("/dashboard")
 def dashboard(request: Request, user: str | None = Cookie(default=None)):
     if not user:
-        return RedirectResponse(url="/auth/login")  # usuário não logado
+        return RedirectResponse(url="/auth/login")
     return templates.TemplateResponse(
         "dashboard.html", {"request": request, "user": user}
     )
+
+# Routers
+app.include_router(auth.router, prefix="/auth")
+app.include_router(users.router, prefix="/users")
+app.include_router(access.router, prefix="/access")
+app.include_router(audit.router, prefix="/audit")
+app.include_router(roles.router)  # já tem prefix="/roles" dentro do router

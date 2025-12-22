@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
+    <title>Cadastro - Access Control System</title>
     <link rel="stylesheet" href="/static/css/style.css">
     <style>
         body {
@@ -20,19 +20,19 @@
             margin-bottom: 2rem;
             font-size: 2rem;
         }
-        .login-container {
+        .register-container {
             background: white;
             padding: 2rem;
             border-radius: 12px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            width: 350px;
+            width: 400px;
             text-align: center;
         }
         h2 {
             margin-bottom: 1rem;
             color: #2c3e50;
         }
-        input {
+        input, select {
             width: 100%;
             padding: 0.8rem;
             margin: 0.5rem 0;
@@ -42,7 +42,7 @@
         button {
             width: 100%;
             padding: 0.8rem;
-            background-color: #3498db;
+            background-color: #27ae60;
             color: white;
             border: none;
             border-radius: 6px;
@@ -50,32 +50,38 @@
             margin-top: 1rem;
         }
         button:hover {
-            background-color: #2980b9;
+            background-color: #1e8449;
         }
-        .register-link {
+        .back {
             margin-top: 1rem;
         }
-        .register-link a {
+        .back a {
             color: #3498db;
             text-decoration: none;
-            font-weight: bold;
         }
-        .register-link a:hover {
+        .back a:hover {
             text-decoration: underline;
         }
     </style>
 </head>
 <body>
     <h1 class="title">Access Control System</h1>
-    <div class="login-container">
-        <h2>Login</h2>
-        <form method="post" action="/auth/login">
+    <div class="register-container">
+        <h2>Cadastre-se</h2>
+        <form method="post" action="/auth/register">
+            <input type="text" name="full_name" placeholder="Nome completo" required>
             <input type="text" name="username" placeholder="Usuário" required>
             <input type="password" name="password" placeholder="Senha" required>
-            <button type="submit">Entrar</button>
+            <input type="email" name="email" placeholder="E-mail" required>
+            <select name="role" required>
+                <option value="">Selecione o perfil</option>
+                <option value="admin">Admin</option>
+                <option value="user">Usuário</option>
+            </select>
+            <button type="submit">Cadastrar</button>
         </form>
-        <div class="register-link">
-            Não tem uma conta? <a href="/auth/register">Cadastre-se</a>
+        <div class="back">
+            <a href="/auth/login">← Voltar para login</a>
         </div>
         {% if error %}
         <p style="color:red; margin-top:1rem;">{{ error }}</p>
