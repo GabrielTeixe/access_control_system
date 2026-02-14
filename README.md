@@ -1,85 +1,143 @@
-# Access Control & Audit System
+ Access Control & Audit System
 
-Sistema de gerenciamento de acesso e auditoria, desenvolvido em **Python** com **FastAPI**. Permite autenticação de usuários, controle de permissões, gerenciamento de roles e monitoramento de ações.
+Sistema completo de controle de acesso (RBAC) e auditoria de ações, desenvolvido com Python + FastAPI, com autenticação segura, gerenciamento de usuários, roles e dashboard administrativo.
 
----
+O projeto simula um ambiente corporativo real com monitoramento de atividades e controle de permissões baseado em papéis.
 
-## Funcionalidades
+Funcionalidades
 
-- **Login/Logout** de usuários
-- **Gerenciamento de Usuários**: criação, atualização e exclusão
-- **Gerenciamento de Roles**: definição de permissões e funções
-- **Auditoria**: registro das ações do sistema
-- **Dashboard** com interface web responsiva
+✅ Autenticação segura (Login / Logout)
+✅ Controle de acesso baseado em roles (RBAC)
+✅ Gerenciamento de usuários (CRUD)
+✅ Gerenciamento de permissões e funções
+✅ Sistema de auditoria de ações (Audit Log)
 
----
+Registro de eventos:
 
-## Tecnologias Utilizadas
+Login de usuário
 
-- **Backend:** Python, FastAPI  
-- **Banco de Dados:** SQLite (pode ser adaptado para MySQL/PostgreSQL)  
-- **Autenticação:** Passlib (bcrypt)  
-- **Templates:** Jinja2  
-- **Front-end:** HTML, CSS  
+Logout
 
----
+Tentativas inválidas
 
-## Estrutura do Projeto
+Criação de usuários
 
+Exclusão de usuários
+
+Alteração de permissões
+
+✅ Dashboard administrativo com métricas:
+
+Total de usuários
+
+Usuários ativos/inativos
+
+Total de eventos auditados
+
+Últimas atividades do sistema
+
+✅ Interface web responsiva com templates Jinja2
+
+ Conceitos Aplicados
+
+Arquitetura em camadas
+
+RBAC (Role Based Access Control)
+
+Autenticação com JWT
+
+ORM com SQLAlchemy
+
+Template Rendering com Jinja2
+
+Boas práticas de organização de projeto
+
+Logs e rastreabilidade de eventos
+
+ Tecnologias Utilizadas
+
+Backend
+
+Python
+
+FastAPI
+
+SQLAlchemy
+
+Passlib (bcrypt)
+
+JWT Authentication
+
+Banco de Dados
+
+SQLite (facilmente adaptável para PostgreSQL ou MySQL)
+
+Frontend
+
+HTML5
+
+CSS3
+
+Jinja2 Templates
+
+Estrutura do Projeto
 access_control_system/
 │
 ├── src/
-│ ├── routers/ # Rotas do sistema (auth, users, roles, audit)
-│ ├── models/ # Modelos de banco de dados
-│ ├── database/ # Conexão e sessão com banco
-│ ├── templates/ # Arquivos HTML
-│ └── static/ # CSS e assets
+│   ├── routers/        # Rotas (auth, users, roles, audit, dashboard)
+│   ├── models/         # Modelos do banco de dados
+│   ├── database/       # Conexão e sessão
+│   ├── core/           # Regras de negócio e permissões
+│   ├── templates/      # HTML
+│   └── static/         # CSS e assets
 │
-├── venv/ # Virtual environment (ignorado pelo git)
-├── main.py # Arquivo principal da aplicação
-├── README.md # Este arquivo
-└── requirements.txt # Dependências Python
+├── main.py             # Inicialização da aplicação
+├── requirements.txt    # Dependências
+└── README.md
 
-
----
-
-## Como Rodar o Projeto
-
-1. Clonar o repositório:
-```bash
-git clone https://github.com/SEU_USUARIO/access_control_system.git
+ Como Executar o Projeto
+ Clonar o repositório
+git clone https://github.com/GabrielTeixe/access_control_system.git
 cd access_control_system
 
-2.Criar e ativar o ambiente virtual:
-
+ Criar ambiente virtual
 python -m venv venv
-# Windows
-.\venv\Scripts\Activate.ps1
-# Linux/macOS
+
+Windows
+.\venv\Scripts\activate
+
+Linux / macOS
 source venv/bin/activate
 
-3.Instalar dependências:
-
+ Instalar dependências
 pip install -r requirements.txt
 
-4.Rodar a aplicação:
+Executar aplicação
+uvicorn src.main:app --reload
 
-python -m uvicorn src.main:app --reload
+ Acessar no navegador
+http://127.0.0.1:8000
 
-5.Acessar no navegador:
+ Usuário de Teste
+Email: admin@admin.com
+Senha: 123
 
-http://127.0.0.1:800
 
-*Usuário de Teste
+(Senha criptografada com bcrypt)
 
-Usuário: admin
+ Possíveis Melhorias Futuras
 
-Senha: 123 (senha criptografada usando bcrypt)
+Integração com PostgreSQL
 
-Observações
+Logs exportáveis (CSV / PDF)
 
-O projeto já possui templates HTML estilizados para login e dashboard.
+Sistema de permissões granular
 
-O sistema ainda pode ser expandido com CRUD completo de usuários, roles e auditoria.
+API REST completa documentada
 
-Recomenda-se não subir a pasta venv para o GitHub.
+Deploy em cloud (Docker / AWS)
+
+ Autor
+
+Gabriel Teixeira
+Desenvolvedor Full Stack
