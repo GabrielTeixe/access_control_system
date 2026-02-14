@@ -1,43 +1,54 @@
-from fastapi import APIRouter, Request, status
-from fastapi.responses import JSONResponse
+from fastapi import APIRouter, Request, Depends
 from fastapi.templating import Jinja2Templates
-from pydantic import BaseModel
-from datetime import datetime
-from typing import List
+from sqlalchemy.orm import Session
+
+from src.database.session import get_db
+from src.models.audit import Audit
+from src.models.user import User
+from src.core.permissions import require_admin
 
 router = APIRouter(prefix="/audit", tags=["Audit"])
 templates = Jinja2Templates(directory="src/templates")
 
-# Modelo de log de auditoria
-class AuditLog(BaseModel):
-    user: str
-    action: str
-    time: str
 
-# Lista simulada de logs de auditoria
-logs_list: List[AuditLog] = [
-    AuditLog(user="admin", action="Login", time=datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
-]
+# HTML — LISTAR LOGS
+
+@router.get("/")
+def list_logs(
+    request: Request,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_admin)
+):
+
+    logs = db.query(Audit).order_by(Audit.id.desc()).all()
+
+    return templates.TemplateResponse(
+        "audit.html",
+        {
+            "request": request,
+            "logs": logs
+        }
+    )
 
 
-# Endpoint HTML
+# API — TODOS LOGS
+@router.get("/all")
+def get_logs(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_admin)
+):
+    return db.query(Audit).all()
 
-@router.get("/", response_class=None)
-def list_logs(request: Request):
-    """Exibe os logs na página HTML"""
-    return templates.TemplateResponse("audit.html", {"request": request, "logs": logs_list})
+# RELATÓRIO DIÁRIO
+@router.get("/daily")
+def daily_report(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_admin)
+):
 
+    logs = db.query(Audit).all()
 
-# Endpoints REST
-
-@router.get("/all", response_model=List[AuditLog])
-def get_logs():
-    """Retorna todos os logs em JSON"""
-    return logs_list
-
-@router.post("/add", response_model=AuditLog, status_code=status.HTTP_201_CREATED)
-def add_log(user: str, action: str):
-    """Adiciona um novo log"""
-    new_log = AuditLog(user=user, action=action, time=datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
-    logs_list.append(new_log)
-    return new_log
+    return {
+        "total": len(logs),
+        "logs": logs
+    }

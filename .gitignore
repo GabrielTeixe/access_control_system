@@ -1,13 +1,10 @@
-# Virtual environment
 venv/
 __pycache__/
 *.pyc
-*.pyo
-*.pyd
-
-# VS Code
+.env
+*.db
+*.sqlite3
+*.log
+.idea/
 .vscode/
-
-# Sistema
-.DS_Store
-Thumbs.db
+access_control.db

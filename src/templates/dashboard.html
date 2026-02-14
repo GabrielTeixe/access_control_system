@@ -1,44 +1,107 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dashboard - Access Control System</title>
-<link rel="stylesheet" href="/static/css/style.css">
-<style>
-    body { font-family: Arial, sans-serif; background-color: #f4f6f8; margin:0; padding:0; }
-    header { background-color: #2c3e50; color:white; padding:1rem; text-align:center; font-size:1.5rem; }
-    .container { padding:2rem; max-width:900px; margin:auto; }
-    .welcome { font-size:1.2rem; margin-bottom:1rem; }
-    .button-grid { display:flex; gap:1rem; flex-wrap:wrap; }
-    .button-grid a { background-color:#3498db; color:white; padding:1rem 2rem; text-decoration:none; border-radius:8px; transition:0.3s; flex:1 1 30%; text-align:center; }
-    .button-grid a:hover { background-color:#2980b9; }
-    .logout { margin-top:2rem; text-align:right; }
-    .logout a { color:#e74c3c; text-decoration:none; font-weight:bold; }
-    .logout a:hover { text-decoration:underline; }
-</style>
+    <meta charset="UTF-8">
+    <title>Dashboard - Access Control</title>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-<header>
-    Access Control System
-</header>
 
-<div class="container">
-    <div class="welcome">
-        Bem-vindo, {{ user }}!
+<body class="bg-gray-100">
+
+<div class="flex h-screen">
+
+    <!-- SIDEBAR -->
+    <aside class="w-64 bg-slate-900 text-white flex flex-col">
+
+        <div class="p-6 text-xl font-bold border-b border-slate-700">
+            🔐 Access Control
+        </div>
+
+        <nav class="flex-1 p-4 space-y-2">
+
+            <a href="/users" class="block px-4 py-2 rounded-lg hover:bg-slate-700 transition">
+                👤 Usuários
+            </a>
+
+            <a href="/roles" class="block px-4 py-2 rounded-lg hover:bg-slate-700 transition">
+                🛡 Funções
+            </a>
+
+            <a href="/resources" class="block px-4 py-2 rounded-lg hover:bg-slate-700 transition">
+                📦 Recursos
+            </a>
+
+            <a href="/audit" class="block px-4 py-2 rounded-lg hover:bg-slate-700 transition">
+                 📊 Monitoramento
+            </a>
+
+        </nav>
+
+        <div class="p-4 border-t border-slate-700">
+            <a href="/auth/logout" class="text-red-400 hover:text-red-300 transition">
+                🚪 Sair
+            </a>
+        </div>
+
+    </aside>
+
+    <!-- Conteúdo Principal -->
+    <div class="flex-1 flex flex-col">
+
+        <!-- TopBar -->
+        <header class="bg-white shadow px-6 py-4 flex justify-between items-center">
+
+            <h1 class="text-2xl font-semibold text-gray-800">
+                Dashboard
+            </h1>
+
+            <div class="text-gray-600">
+                Bem-Vindo, <span class="font-semibold">{{ current_user.name }}</span>
+            </div>
+
+            {% if current_user.role == "admin" %}
+                <a href="/admin/panel" class="bg-red-500 text-white px-4 py-2 rounded-lg">
+                    Painel Admin
+                </a>
+            {% endif %}
+
+        </header>
+
+        <!-- Main -->
+        <main class="flex-1 p-6">
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+
+                <!-- Card 1 -->
+                <div class="bg-white p-6 rounded-2xl shadow hover:shadow-lg transition">
+                    <h2 class="text-gray-500 text-sm">Total Usuários</h2>
+                    <p class="text-3xl font-bold mt-2">12</p>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="bg-white p-6 rounded-2xl shadow hover:shadow-lg transition">
+                    <h2 class="text-gray-500 text-sm">Total Funções</h2>
+                    <p class="text-3xl font-bold mt-2">5</p>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="bg-white p-6 rounded-2xl shadow hover:shadow-lg transition">
+                    <h2 class="text-gray-500 text-sm">Recursos</h2>
+                    <p class="text-3xl font-bold mt-2">8</p>
+                </div>
+
+                <!-- Card 4 -->
+                <div class="bg-white p-6 rounded-2xl shadow hover:shadow-lg transition">
+                    <h2 class="text-gray-500 text-sm">Logs Hoje</h2>
+                    <p class="text-3xl font-bold mt-2">23</p>
+                </div>
+
+            </div>
+
+        </main>
     </div>
 
-    <h2>Funcionalidades</h2>
-    <div class="button-grid">
-        <a href="/users/">Gerenciar Usuários</a>
-        <a href="/roles/">Gerenciar Roles</a>
-        <a href="/access/">Gerenciar Recursos</a> <!-- botão funcionando -->
-        <a href="/audit/">Auditoria</a>
-    </div>
-
-    <div class="logout">
-        <a href="/auth/logout">Sair</a>
-    </div>
 </div>
+
 </body>
 </html>

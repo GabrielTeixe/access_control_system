@@ -1,64 +1,169 @@
-from fastapi import APIRouter, Request, Form
+from fastapi import APIRouter, Request, Form, Depends, HTTPException, status
 from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
-from typing import List, Dict
+from sqlalchemy.orm import Session
 
-router = APIRouter()
+from src.models.user import User
+from src.models.role import Role
+from src.database.session import get_db
+from src.core.deps import get_current_user
+from src.core.security import get_password_hash
+from src.core.permissions import require_admin
+
+
+router = APIRouter(prefix="/users", tags=["Users"])
 templates = Jinja2Templates(directory="src/templates")
 
-# Banco simulado de usuários
-fake_users: List[Dict] = [
-    {"fullname": "Admin User", "email": "admin@example.com", "username": "admin", "role": "Administrator"}
-]
 
-# Listar usuários
+# SOMENTE ADMIN
+def require_admin(
+    current_user: User = Depends(get_current_user)
+) -> User:
+
+    if not current_user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Usuário inativo"
+        )
+
+    if not current_user.role or current_user.role.name != "admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Acesso restrito a administradores"
+        )
+
+    return current_user
+
+
+# LISTAR USUÁRIOS
 @router.get("/")
-def list_users(request: Request):
-    return templates.TemplateResponse("users.html", {"request": request, "users": fake_users})
+def list_users(
+    request: Request,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_admin)
+):
+    users = db.query(User).order_by(User.id.desc()).all()
 
-# Adicionar usuário
+    return templates.TemplateResponse(
+        "users.html",
+        {
+            "request": request,
+            "users": users
+        }
+    )
+
+
+# CRIAR USUÁRIO
 @router.post("/add")
 def add_user(
     fullname: str = Form(...),
     email: str = Form(...),
-    username: str = Form(...),
-    role: str = Form(...)
+    password: str = Form(...),
+    role_name: str = Form("user"),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_admin)
 ):
-    fake_users.append({
-        "fullname": fullname,
-        "email": email,
-        "username": username,
-        "role": role
-    })
-    return RedirectResponse(url="/users/", status_code=302)
+    if db.query(User).filter(User.email == email).first():
+        raise HTTPException(status_code=400, detail="Usuário já existe")
 
-# Remover usuário
-@router.post("/delete")
-def delete_user(username: str = Form(...)):
-    global fake_users
-    fake_users = [u for u in fake_users if u["username"] != username]
-    return RedirectResponse(url="/users/", status_code=302)
+    role = db.query(Role).filter(Role.name == role_name).first()
 
-# Editar usuário (GET para exibir formulário)
-@router.get("/edit")
-def edit_user_get(request: Request, username: str):
-    user = next((u for u in fake_users if u["username"] == username), None)
+    if not role:
+        raise HTTPException(status_code=400, detail="Role inválida")
+
+    new_user = User(
+        name=fullname,
+        email=email,
+        password=get_password_hash(password),
+        role=role,
+        is_active=True
+    )
+
+    db.add(new_user)
+    db.commit()
+
+    return RedirectResponse(url="/users/", status_code=status.HTTP_303_SEE_OTHER)
+
+
+# DELETAR
+@router.get("/delete/{user_id}")
+def delete_user(
+    user_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_admin)
+):
+    user = db.get(User, user_id)
+
     if not user:
-        return RedirectResponse(url="/users/")
-    return templates.TemplateResponse("edit_user.html", {"request": request, "user": user})
+        raise HTTPException(status_code=404, detail="Usuário não encontrado")
 
-# Editar usuário (POST para salvar)
-@router.post("/edit")
-def edit_user_post(
-    fullname: str = Form(...),
-    email: str = Form(...),
-    username: str = Form(...),
-    role: str = Form(...)
+    if user.id == current_user.id:
+        raise HTTPException(
+            status_code=400,
+            detail="Você não pode deletar a si mesmo"
+        )
+
+    db.delete(user)
+    db.commit()
+
+    return RedirectResponse(url="/users/", status_code=status.HTTP_303_SEE_OTHER)
+
+
+# ATIVAR / DESATIVAR
+@router.get("/toggle/{user_id}")
+def toggle_user(
+    user_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_admin)
 ):
-    for u in fake_users:
-        if u["username"] == username:
-            u["fullname"] = fullname
-            u["email"] = email
-            u["role"] = role
-            break
-    return RedirectResponse(url="/users/", status_code=302)
+    user = db.get(User, user_id)
+
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuário não encontrado")
+
+    if user.id == current_user.id:
+        raise HTTPException(
+            status_code=400,
+            detail="Você não pode desativar a si mesmo"
+        )
+
+    user.is_active = not user.is_active
+    db.commit()
+
+    return RedirectResponse(url="/users/", status_code=status.HTTP_303_SEE_OTHER)
+
+
+# ALTERAR FUNÇÃO
+@router.get("/role/{user_id}")
+def change_role(
+    user_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_admin)
+):
+    user = db.get(User, user_id)
+
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuário não encontrado")
+
+    if user.id == current_user.id:
+        raise HTTPException(
+            status_code=400,
+            detail="Você não pode alterar sua própria função"
+        )
+
+    new_role_name = "admin" if user.role.name == "user" else "user"
+    new_role = db.query(Role).filter(Role.name == new_role_name).first()
+
+    user.role = new_role
+    db.commit()
+
+    return RedirectResponse(url="/users/", status_code=status.HTTP_303_SEE_OTHER)
+
+
+# API
+@router.get("/all")
+def get_users_api(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_admin)
+):
+    return db.query(User).all()

@@ -2,16 +2,16 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Gestão de Funções</title>
+    <title>Gestão de Recursos</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f6f9;
+            font-family: Arial;
+            background: #f4f6f9;
             margin: 0;
         }
 
         header {
-            background-color: #327ad8;
+            background: #327ad8;
             color: white;
             padding: 20px;
             text-align: center;
@@ -20,17 +20,12 @@
         }
 
         .container {
-            max-width: 950px;
+            max-width: 1000px;
             margin: 40px auto;
             background: white;
             padding: 30px;
             border-radius: 12px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-        }
-
-        h2 {
-            margin-top: 0;
-            margin-bottom: 15px;
         }
 
         form {
@@ -39,8 +34,7 @@
             margin-bottom: 25px;
         }
 
-        input {
-            flex: 1;
+        input, select {
             padding: 10px;
             border-radius: 6px;
             border: 1px solid #ccc;
@@ -52,7 +46,6 @@
             border-radius: 6px;
             cursor: pointer;
             font-weight: bold;
-            transition: 0.2s;
         }
 
         .btn-add {
@@ -60,22 +53,8 @@
             color: white;
         }
 
-        .btn-add:hover {
-            background: #317fe4;
-        }
-
         .btn-delete {
             background: #e74c3c;
-            color: white;
-        }
-
-        .btn-delete:hover {
-            background: #c0392b;
-        }
-
-        .btn-disabled {
-            background: #bdc3c7;
-            cursor: not-allowed;
             color: white;
         }
 
@@ -85,10 +64,9 @@
         }
 
         th {
-            background-color: #327ad8;
+            background: #327ad8;
             color: white;
             padding: 12px;
-            text-align: left;
         }
 
         td {
@@ -112,80 +90,71 @@
             background: #95a5a6;
             color: white;
         }
-
-        .users-count {
-            font-weight: bold;
-            color: #555;
-        }
-
-        .footer-link {
-            display: block;
-            margin-top: 25px;
-            text-decoration: none;
-            color: #327ad8;
-            font-weight: bold;
-        }
     </style>
 </head>
 <body>
 
-<header>Gestão Estrutural de Funções</header>
+<header>Gestão de Recursos do Sistema</header>
 
 <div class="container">
 
-    <h2>Criar Nova Função</h2>
+    <h2>Novo Recurso</h2>
 
-    <form method="post" action="/roles/add">
-        <input type="text" name="name" placeholder="Nome da nova função (ex: gerente)" required>
+    <form method="post" action="/resources/add">
+        <input type="text" name="name" placeholder="Nome (ex: Usuários)" required>
+        <input type="text" name="path" placeholder="Path (ex: /users)" required>
+
+        <select name="type">
+            <option value="page">Página</option>
+            <option value="api">API</option>
+            <option value="module">Módulo</option>
+        </select>
+
+        <select name="required_role">
+            <option value="admin">Admin</option>
+            <option value="user">User</option>
+        </select>
+
         <button type="submit" class="btn-add">Adicionar</button>
     </form>
 
-    <h2>Funções Cadastradas</h2>
+    <h2>Recursos Cadastrados</h2>
 
     <table>
         <tr>
             <th>ID</th>
             <th>Nome</th>
+            <th>Path</th>
+            <th>Tipo</th>
+            <th>Role Necessária</th>
             <th>Status</th>
-            <th>Usuários Vinculados</th>
             <th>Ações</th>
         </tr>
 
-        {% for role, user_count in roles %}
+        {% for resource in resources %}
         <tr>
-            <td>{{ role.id }}</td>
-            <td>{{ role.name }}</td>
-
+            <td>{{ resource.id }}</td>
+            <td>{{ resource.name }}</td>
+            <td>{{ resource.path }}</td>
+            <td>{{ resource.type }}</td>
+            <td>{{ resource.required_role }}</td>
             <td>
-                {% if role.is_active %}
-                    <span class="badge active">Ativa</span>
+                {% if resource.is_active %}
+                    <span class="badge active">Ativo</span>
                 {% else %}
-                    <span class="badge inactive">Inativa</span>
+                    <span class="badge inactive">Inativo</span>
                 {% endif %}
             </td>
-
-            <td class="users-count">
-                {{ user_count }}
-            </td>
-
             <td>
-                {% if user_count == 0 %}
-                <form method="post" action="/roles/delete" style="margin:0;">
-                    <input type="hidden" name="role_id" value="{{ role.id }}">
+                <form method="post" action="/resources/delete" style="margin:0;">
+                    <input type="hidden" name="resource_id" value="{{ resource.id }}">
                     <button type="submit" class="btn-delete">Excluir</button>
                 </form>
-                {% else %}
-                    <button class="btn-disabled" disabled>
-                        Vinculada a usuários
-                    </button>
-                {% endif %}
             </td>
         </tr>
         {% endfor %}
 
     </table>
-
-    <a href="/dashboard" class="footer-link">← Voltar ao Dashboard</a>
 
 </div>
 

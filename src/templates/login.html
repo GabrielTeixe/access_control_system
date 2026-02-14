@@ -3,8 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
+    <title>Login | Access Control System</title>
+
     <link rel="stylesheet" href="/static/css/style.css">
+
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -14,12 +16,15 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
+            margin: 0;
         }
+
         h1.title {
             color: #2c3e50;
             margin-bottom: 2rem;
             font-size: 2rem;
         }
+
         .login-container {
             background: white;
             padding: 2rem;
@@ -28,17 +33,41 @@
             width: 350px;
             text-align: center;
         }
+
         h2 {
             margin-bottom: 1rem;
             color: #2c3e50;
         }
-        input {
+
+        .form-group {
+            margin-bottom: 0.8rem;
+        }
+
+        input[type="email"],
+        input[type="password"] {
             width: 100%;
             padding: 0.8rem;
-            margin: 0.5rem 0;
             border: 1px solid #ccc;
             border-radius: 6px;
+            box-sizing: border-box;
         }
+
+        .remember {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin: 0.8rem 0;
+            font-size: 0.9rem;
+            color: #555;
+        }
+
+        .remember input[type="checkbox"] {
+            width: auto;
+            margin: 0;
+            padding: 0;
+        }
+
+
         button {
             width: 100%;
             padding: 0.8rem;
@@ -47,39 +76,88 @@
             border: none;
             border-radius: 6px;
             cursor: pointer;
-            margin-top: 1rem;
+            margin-top: 0.5rem;
+            font-size: 1rem;
         }
+
         button:hover {
             background-color: #2980b9;
         }
+
+        .error-message {
+            background-color: #fdecea;
+            color: #c0392b;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            border: 1px solid #f5c6cb;
+            font-size: 0.95rem;
+        }
+
         .register-link {
             margin-top: 1rem;
+            font-size: 0.9rem;
         }
+
         .register-link a {
             color: #3498db;
             text-decoration: none;
             font-weight: bold;
         }
+
         .register-link a:hover {
             text-decoration: underline;
         }
     </style>
 </head>
+
 <body>
+
     <h1 class="title">Access Control System</h1>
+
     <div class="login-container">
         <h2>Login</h2>
+
+        {% if error %}
+        <div class="error-message">
+            {{ error }}
+        </div>
+        {% endif %}
+
         <form method="post" action="/auth/login">
-            <input type="text" name="username" placeholder="Usuário" required>
-            <input type="password" name="password" placeholder="Senha" required>
+
+            <div class="form-group">
+                <input
+                    type="email"
+                    name="email"
+                    placeholder="E-mail"
+                    required
+                    autofocus
+                >
+            </div>
+
+            <div class="form-group">
+                <input
+                    type="password"
+                    name="password"
+                    placeholder="Senha"
+                    required
+                >
+            </div>
+
+            <label class="remember">
+                <input type="checkbox" name="remember">
+                Lembrar de mim
+            </label>
+
             <button type="submit">Entrar</button>
         </form>
+
         <div class="register-link">
-            Não tem uma conta? <a href="/auth/register">Cadastre-se</a>
+            Não tem uma conta?
+            <a href="/auth/register">Cadastre-se</a>
         </div>
-        {% if error %}
-        <p style="color:red; margin-top:1rem;">{{ error }}</p>
-        {% endif %}
     </div>
+
 </body>
 </html>
